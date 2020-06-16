@@ -5,6 +5,7 @@ const router = require("express").Router();
 
 const Users = require("../users/users-model.js");
 const { isValid } = require("../users/users-service.js");
+const constants = require("../config/constants.js");
 
 router.post("/register", (req, res) => {
   const credentials = req.body;
@@ -42,7 +43,7 @@ router.post("/login", (req, res) => {
         // compare the password the hash stored in the database
         if (user && bcryptjs.compareSync(password, user.password)) {
           const token = createToken(user);
-          res.status(200).json({ message: "Welcome to our API" });
+          res.status(200).json({ message: "Welcome to our API", token });
         } else {
           res.status(401).json({ message: "Invalid credentials" });
         }
@@ -64,11 +65,10 @@ function createToken(user) {
     username: user.username,
     role: user.role,
   };
-  const secret = process.env.JWT_SECRET || "keep it secret, keep it safe!";
   const options = {
     expiresIn: "1d",
   };
-  return jwt.sign(payload, secret, options);
+  return jwt.sign(payload, constants.jwtSecret, options);
 }
 
 module.exports = router;
